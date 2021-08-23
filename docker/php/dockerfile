@@ -1,0 +1,66 @@
+FROM php:7.3-apache
+
+ARG UID=1000
+ARG GID=1000
+
+RUN apt-get update && apt-get install -y \
+        git \
+        zip \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libmcrypt-dev \
+        libssl-dev \
+        libmemcached-dev \
+        libz-dev \
+        zlib1g-dev \
+        libsqlite3-dev \
+        libxml2-dev \
+        libcurl3-dev \
+        libedit-dev \
+        libpspell-dev \
+        libldap2-dev \
+        unixodbc-dev \
+        libpq-dev \
+        libmagickwand-dev \
+        libmagickcore-dev
+
+RUN apt-get -y install gcc make autoconf libc-dev pkg-config libzip-dev
+
+# Install PHP Extensions
+RUN echo "Installing PHP extensions"
+RUN docker-php-ext-install zip
+RUN docker-php-ext-install bcmath
+RUN docker-php-ext-install json
+RUN docker-php-ext-install curl
+RUN docker-php-ext-install mbstring
+RUN docker-php-ext-install gd
+
+RUN pecl install xdebug
+
+# Configure PHP extensions
+RUN echo "Configuring PHP extensions"
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
+
+# Enable PHP Extensions
+RUN echo "Enable PHP extensions"
+RUN docker-php-ext-enable gd 
+RUN docker-php-ext-enable xdebug
+
+# Install composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+# Clean up, try to reduce image size (much as you can on Debian..)
+RUN apt-get autoremove -y \
+        && apt-get clean all \
+        && rm -rvf /var/lib/apt/lists/* \
+        && rm -rvf /usr/share/doc /usr/share/man /usr/share/locale \
+        && rm -fv /usr/local/etc/php-fpm.d/*.conf \
+        && rm -rvf /usr/src/php
+
+# Copy php configuration files
+# COPY  ./php.ini /usr/local/etc/php/php.ini
+
+
+EXPOSE 80
+
+CMD ["apache2-foreground"]

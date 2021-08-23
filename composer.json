@@ -6,6 +6,8 @@
     "type": "project",
     "require": {
         "php": "^7.3|^8.0",
+        "amranidev/micro-bus": "^0.2.7",
+        "aws/aws-sdk-php": "^3.191",
         "laravel/lumen-framework": "^8.0"
     },
     "require-dev": {
