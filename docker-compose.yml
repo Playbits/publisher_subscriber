@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  php:
+    container_name: "pangaea_php"
+    build: ./docker/php/
+    hostname: playbit.pangaea.com
+    ports:
+      - 0.0.0.0:8800:80
+    volumes:
+      - ./:/var/www/pangaea
+      - ./docker/log/apache2:/var/log/apache2
